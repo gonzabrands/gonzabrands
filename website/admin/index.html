@@ -1,56 +1,655 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Gonzabrands</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #0f0f0f;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .container {
-            text-align: center;
-            padding: 2rem;
-        }
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
-        }
-        h1 span { color: #888; font-weight: 300; }
-        p {
-            color: #666;
-            margin-bottom: 2rem;
-            font-size: 1rem;
-        }
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 2rem;
-            background: #fff;
-            color: #000;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            letter-spacing: 0.02em;
-            transition: background 0.2s, color 0.2s;
-        }
-        .btn:hover { background: #e0e0e0; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Manager — Gonzabrands Admin</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #222222;
+    --accent: #ffffff;
+    --accent-dim: #555555;
+    --text: #e8e8e8;
+    --text-muted: #666;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --blue: #3b82f6;
+    --radius: 8px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ---- Sidebar ---- */
+  .sidebar {
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+  }
+  .sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
+  .logo span { color: var(--accent-dim); font-weight: 300; }
+  .sidebar-subtitle { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .sidebar-section-title {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 20px 20px 8px;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .sidebar-item:hover { color: var(--text); background: var(--surface2); }
+  .sidebar-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--surface2); }
+  .sidebar-item .badge {
+    margin-left: auto;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  .sidebar-item.active .badge { background: #fff2; color: var(--text); border-color: #fff3; }
+
+  /* ---- Main ---- */
+  .main {
+    margin-left: 260px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    position: sticky; top: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 10;
+  }
+  .topbar h1 { font-size: 1rem; font-weight: 600; }
+  .topbar-breadcrumb { font-size: 0.8rem; color: var(--text-muted); }
+  .topbar-breadcrumb span { color: var(--text); }
+  .topbar-right { margin-left: auto; display: flex; gap: 10px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .btn:hover { background: var(--surface2); border-color: #333; }
+  .btn-primary { background: #fff; color: #000; border-color: #fff; }
+  .btn-primary:hover { background: #e0e0e0; border-color: #e0e0e0; }
+
+  .content { padding: 32px; flex: 1; }
+
+  /* ---- Page Panel ---- */
+  .page-panel { display: none; }
+  .page-panel.active { display: block; }
+
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .page-header h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+  .page-header p { font-size: 0.85rem; color: var(--text-muted); }
+
+  .images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .image-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .image-card:hover { border-color: #444; }
+
+  .image-card-preview {
+    width: 100%;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    background: var(--surface2);
+    position: relative;
+    cursor: pointer;
+  }
+  .image-card-preview img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+  }
+  .image-card-preview:hover img { transform: scale(1.04); }
+
+  .image-card-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .image-card-preview:hover .image-card-overlay { opacity: 1; }
+  .overlay-btn {
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .overlay-btn:hover { background: #e0e0e0; }
+
+  .image-card-info {
+    padding: 12px 14px;
+  }
+  .image-card-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .image-card-path {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .image-card-actions {
+    padding: 0 14px 12px;
+    display: flex;
+    gap: 8px;
+  }
+  .replace-btn {
+    flex: 1;
+    padding: 7px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+    font-family: inherit;
+    text-align: center;
+  }
+  .replace-btn:hover { background: var(--surface2); border-color: #444; }
+  .replace-btn.uploading { color: var(--yellow); border-color: var(--yellow); }
+  .replace-btn.done { color: var(--green); border-color: var(--green); }
+
+  /* ---- Toast ---- */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.25s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.toast-success { border-color: var(--green); color: var(--green); }
+
+  /* ---- Hidden input ---- */
+  #file-input { display: none; }
+
+  /* ---- Empty state ---- */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  /* Note banner */
+  .note-banner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .note-banner strong { color: var(--text); }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .content { padding: 20px; }
+    .images-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>Admin <span>Panel</span></h1>
-        <p>Gonzabrands — Administration Area</p>
-        <a href="#" class="btn">Login to Dashboard</a>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">Gonza<span>brands</span></div>
+    <div class="sidebar-subtitle">Image Manager</div>
+  </div>
+
+  <div class="sidebar-section-title">Pages</div>
+
+  <div class="sidebar-item active" onclick="showPage('home', this)">
+    🏠 Home
+    <span class="badge">7</span>
+  </div>
+  <div class="sidebar-item" onclick="showPage('team', this)">
+    👥 Team
+    <span class="badge">8</span>
+  </div>
+  <div class="sidebar-item" onclick="showPage('blog', this)">
+    📰 Blog
+    <span class="badge">8</span>
+  </div>
+  <div class="sidebar-item" onclick="showPage('portfolio', this)">
+    🖼 Portfolio
+    <span class="badge">6</span>
+  </div>
+
+  <div class="sidebar-section-title">Projects</div>
+
+  <div class="sidebar-item" onclick="showPage('project1', this)">
+    📁 Project 1 — Interior Design
+    <span class="badge">7</span>
+  </div>
+  <div class="sidebar-item" onclick="showPage('project2', this)">
+    📁 Project 2 — Home Security
+    <span class="badge">7</span>
+  </div>
+  <div class="sidebar-item" onclick="showPage('project3', this)">
+    📁 Project 3 — Skincare
+    <span class="badge">7</span>
+  </div>
+  <div class="sidebar-item" onclick="showPage('project4', this)">
+    📁 Project 4 — Cascade of Lava
+    <span class="badge">7</span>
+  </div>
+  <div class="sidebar-item" onclick="showPage('project5', this)">
+    📁 Project 5 — Air Pro
+    <span class="badge">5</span>
+  </div>
+  <div class="sidebar-item" onclick="showPage('project6', this)">
+    📁 Project 6 — Chocolonely
+    <span class="badge">8</span>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-breadcrumb">Admin / <span id="breadcrumb-text">Home</span></div>
     </div>
+  </div>
+
+  <div class="content">
+
+    <div class="note-banner">
+      <strong>How it works:</strong> Click <em>Replace Image</em> or hover over any image and click <em>Change</em> to select a new file from your computer. The image path stays the same — just swap the file. After replacing, commit and push to GitHub for it to go live.
+    </div>
+
+    <!-- HOME PAGE -->
+    <div class="page-panel active" id="panel-home">
+      <div class="page-header">
+        <div>
+          <h2>Home Page</h2>
+          <p>index.html — hero, about, team, blog section images</p>
+        </div>
+      </div>
+      <div class="images-grid" id="grid-home"></div>
+    </div>
+
+    <!-- TEAM PAGE -->
+    <div class="page-panel" id="panel-team">
+      <div class="page-header">
+        <div>
+          <h2>Team Page</h2>
+          <p>team.html — team member photos</p>
+        </div>
+      </div>
+      <div class="images-grid" id="grid-team"></div>
+    </div>
+
+    <!-- BLOG PAGE -->
+    <div class="page-panel" id="panel-blog">
+      <div class="page-header">
+        <div>
+          <h2>Blog Page</h2>
+          <p>blog.html / publication.html — article cover images</p>
+        </div>
+      </div>
+      <div class="images-grid" id="grid-blog"></div>
+    </div>
+
+    <!-- PORTFOLIO PAGE -->
+    <div class="page-panel" id="panel-portfolio">
+      <div class="page-header">
+        <div>
+          <h2>Portfolio</h2>
+          <p>portfolio-1.html / portfolio-2.html / portfolio-3.html — cover thumbnails</p>
+        </div>
+      </div>
+      <div class="images-grid" id="grid-portfolio"></div>
+    </div>
+
+    <!-- PROJECT 1 -->
+    <div class="page-panel" id="panel-project1">
+      <div class="page-header">
+        <div><h2>Project 1 — Interior Design Studio</h2><p>project-1.html images</p></div>
+      </div>
+      <div class="images-grid" id="grid-project1"></div>
+    </div>
+
+    <!-- PROJECT 2 -->
+    <div class="page-panel" id="panel-project2">
+      <div class="page-header">
+        <div><h2>Project 2 — Home Security Camera</h2><p>project-2.html images</p></div>
+      </div>
+      <div class="images-grid" id="grid-project2"></div>
+    </div>
+
+    <!-- PROJECT 3 -->
+    <div class="page-panel" id="panel-project3">
+      <div class="page-header">
+        <div><h2>Project 3 — Kemia Honest Skincare</h2><p>project-3.html images</p></div>
+      </div>
+      <div class="images-grid" id="grid-project3"></div>
+    </div>
+
+    <!-- PROJECT 4 -->
+    <div class="page-panel" id="panel-project4">
+      <div class="page-header">
+        <div><h2>Project 4 — Cascade of Lava</h2><p>project-4.html images</p></div>
+      </div>
+      <div class="images-grid" id="grid-project4"></div>
+    </div>
+
+    <!-- PROJECT 5 -->
+    <div class="page-panel" id="panel-project5">
+      <div class="page-header">
+        <div><h2>Project 5 — Air Pro by Molekule</h2><p>project-5.html images</p></div>
+      </div>
+      <div class="images-grid" id="grid-project5"></div>
+    </div>
+
+    <!-- PROJECT 6 -->
+    <div class="page-panel" id="panel-project6">
+      <div class="page-header">
+        <div><h2>Project 6 — Tony's Chocolonely</h2><p>project-6.html images</p></div>
+      </div>
+      <div class="images-grid" id="grid-project6"></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<input type="file" id="file-input" accept="image/*">
+<div id="toast"></div>
+
+<script>
+// ================================================================
+// IMAGE DATA MAP
+// basePath is relative to the client folder from the admin folder
+// ================================================================
+const CLIENT_BASE = '../client/';
+
+const pageData = {
+  home: {
+    label: 'Home Page',
+    images: [
+      { path: 'img/photo/1.jpg',              label: 'About — Studio Photo' },
+      { path: 'img/photo/2.jpg',              label: 'Services — Team Thumbnail' },
+      { path: 'img/faces/customers/2.jpg',    label: 'About — Founder Avatar' },
+      { path: 'img/blog/1.jpg',               label: 'Blog Card 1 Cover' },
+      { path: 'img/blog/2.jpg',               label: 'Blog Card 2 Cover' },
+      { path: 'img/partners/1.svg',           label: 'Partner Logo 1' },
+      { path: 'img/partners/2.svg',           label: 'Partner Logo 2' },
+    ]
+  },
+  team: {
+    label: 'Team Page',
+    images: [
+      { path: 'img/faces/1.jpg', label: 'Team Member 1' },
+      { path: 'img/faces/2.jpg', label: 'Team Member 2' },
+      { path: 'img/faces/3.jpg', label: 'Team Member 3' },
+      { path: 'img/faces/4.jpg', label: 'Team Member 4' },
+      { path: 'img/faces/5.jpg', label: 'Team Member 5' },
+      { path: 'img/faces/6.jpg', label: 'Team Member 6' },
+      { path: 'img/faces/7.jpg', label: 'Team Member 7' },
+      { path: 'img/faces/8.jpg', label: 'Team Member 8' },
+    ]
+  },
+  blog: {
+    label: 'Blog / Publication',
+    images: [
+      { path: 'img/blog/1.jpg', label: 'Blog Cover 1' },
+      { path: 'img/blog/2.jpg', label: 'Blog Cover 2' },
+      { path: 'img/blog/3.jpg', label: 'Publication Hero Cover' },
+      { path: 'img/blog/4.jpg', label: 'Publication Sidebar 1' },
+      { path: 'img/blog/5.jpg', label: 'Blog Cover 5' },
+      { path: 'img/blog/6.jpg', label: 'Blog Cover 6' },
+      { path: 'img/blog/7.jpg', label: 'Publication Sidebar 2' },
+      { path: 'img/blog/8.jpg', label: 'Publication Related 1' },
+    ]
+  },
+  portfolio: {
+    label: 'Portfolio',
+    images: [
+      { path: 'img/works/1/1.jpg', label: 'Portfolio — Work 1 Thumb' },
+      { path: 'img/works/2/1.jpg', label: 'Portfolio — Work 2 Thumb' },
+      { path: 'img/works/3/1.jpg', label: 'Portfolio — Work 3 Thumb' },
+      { path: 'img/works/4/1.jpg', label: 'Portfolio — Work 4 Thumb' },
+      { path: 'img/works/5/1.jpg', label: 'Portfolio — Work 5 Thumb' },
+      { path: 'img/works/6/1.jpg', label: 'Portfolio — Work 6 Thumb' },
+    ]
+  },
+  project1: {
+    images: Array.from({length:7}, (_,i) => ({ path: `img/works/1/${i+1}.jpg`, label: `Project 1 — Image ${i+1}` }))
+  },
+  project2: {
+    images: Array.from({length:7}, (_,i) => ({ path: `img/works/2/${i+1}.jpg`, label: `Project 2 — Image ${i+1}` }))
+  },
+  project3: {
+    images: Array.from({length:7}, (_,i) => ({ path: `img/works/3/${i+1}.jpg`, label: `Project 3 — Image ${i+1}` }))
+  },
+  project4: {
+    images: Array.from({length:7}, (_,i) => ({ path: `img/works/4/${i+1}.jpg`, label: `Project 4 — Image ${i+1}` }))
+  },
+  project5: {
+    images: Array.from({length:5}, (_,i) => {
+      const ext = ['.jpg','.jpg','.gif','.jpg','.jpg'][i];
+      return { path: `img/works/5/${i+1}${ext}`, label: `Project 5 — Image ${i+1}` };
+    })
+  },
+  project6: {
+    images: [
+      {path:'img/works/6/1.jpg', label:'Project 6 — Image 1'},
+      {path:'img/works/6/2.gif', label:'Project 6 — Image 2 (GIF)'},
+      {path:'img/works/6/3.jpg', label:'Project 6 — Image 3'},
+      {path:'img/works/6/4.gif', label:'Project 6 — Image 4 (GIF)'},
+      {path:'img/works/6/5.jpg', label:'Project 6 — Image 5'},
+      {path:'img/works/6/6.jpg', label:'Project 6 — Image 6'},
+      {path:'img/works/6/7.jpg', label:'Project 6 — Image 7'},
+      {path:'img/works/6/8.jpg', label:'Project 6 — Image 8'},
+    ]
+  },
+};
+
+// ================================================================
+// RENDERING
+// ================================================================
+let currentTarget = null; // { imgEl, btnEl, path }
+
+function buildGrid(pageKey) {
+  const grid = document.getElementById(`grid-${pageKey}`);
+  if (!grid || grid.dataset.built) return;
+  grid.dataset.built = '1';
+
+  const data = pageData[pageKey];
+  if (!data || !data.images.length) {
+    grid.innerHTML = '<div class="empty-state">No images mapped for this page yet.</div>';
+    return;
+  }
+
+  data.images.forEach(img => {
+    const src = CLIENT_BASE + img.path;
+    const card = document.createElement('div');
+    card.className = 'image-card';
+    card.innerHTML = `
+      <div class="image-card-preview" onclick="triggerReplace('${img.path}', this.querySelector('img'), this.closest('.image-card').querySelector('.replace-btn'))">
+        <img src="${src}" alt="${img.label}" onerror="this.style.opacity=0.2">
+        <div class="image-card-overlay">
+          <button class="overlay-btn">Change</button>
+        </div>
+      </div>
+      <div class="image-card-info">
+        <div class="image-card-label">${img.label}</div>
+        <div class="image-card-path">${img.path}</div>
+      </div>
+      <div class="image-card-actions">
+        <button class="replace-btn" onclick="triggerReplace('${img.path}', this.closest('.image-card').querySelector('img'), this)">
+          📤 Replace Image
+        </button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ================================================================
+// PAGE SWITCHING
+// ================================================================
+function showPage(pageKey, el) {
+  document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById(`panel-${pageKey}`).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('breadcrumb-text').textContent = el.textContent.trim();
+  buildGrid(pageKey);
+}
+
+// Build home on load
+buildGrid('home');
+
+// ================================================================
+// IMAGE REPLACE LOGIC
+// ================================================================
+function triggerReplace(imagePath, imgEl, btnEl) {
+  currentTarget = { imagePath, imgEl, btnEl };
+  document.getElementById('file-input').click();
+}
+
+document.getElementById('file-input').addEventListener('change', function () {
+  if (!this.files || !this.files[0]) return;
+  const file = this.files[0];
+  const { imgEl, btnEl } = currentTarget;
+
+  btnEl.textContent = '⏳ Loading...';
+  btnEl.className = 'replace-btn uploading';
+
+  // Preview the selected image locally in the browser
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    imgEl.src = e.target.result;
+    imgEl.style.opacity = 1;
+    btnEl.textContent = '✅ Updated (local preview)';
+    btnEl.className = 'replace-btn done';
+    showToast(`Preview updated: ${file.name}`, 'success');
+
+    // Reset button after 3s
+    setTimeout(() => {
+      btnEl.textContent = '📤 Replace Image';
+      btnEl.className = 'replace-btn';
+    }, 4000);
+  };
+  reader.readAsDataURL(file);
+
+  // Reset file input so same file can be picked again
+  this.value = '';
+});
+
+// ================================================================
+// TOAST
+// ================================================================
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (type ? ` toast-${type}` : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ''; }, 3000);
+}
+</script>
 </body>
 </html>
-
